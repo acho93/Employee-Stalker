@@ -18,3 +18,16 @@ VALUES
 ('Recruiter', 50000, 4),
 ('Accountant', 80000, 5),
 ('Financial Analyst', 100000, 5);
+
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+VALUES 
+('Chandler', 'Bing', 1, null),
+('Rachel', 'Green', 2, null),
+('Monica', 'Geller', 3, 2),
+('Ross', 'Geller', 4, 1),
+('Phoebe', 'Buffay', 5, null),
+('Joey', 'Tribbiani', 6, 5),
+('Janice', 'Hosenstein', 7, null),
+('Gunther', 'Tyler', 8, 7),
+('Mike', 'Hannigan', 9, 5),
+('Richard', 'Burke', 10, 1);
