@@ -13,7 +13,7 @@ const promptUser = () => {
     inquirer.prompt([
         {
             type: 'list',
-            name: 'choices',
+            name: 'options',
             message: 'What would you like to do?',
             choices: [
                 'View all departments',
@@ -28,37 +28,37 @@ const promptUser = () => {
         }
     ])
     .then(response => {
-        const { choices } = response;
+        const { options } = response;
 
-        if (choices === 'View all departments') {
+        if (options === 'View all departments') {
             viewDepartments();
         }
 
-        if (choices === 'View all roles') {
+        if (options === 'View all roles') {
             viewRoles();
         }
 
-        if (choices === 'View all employees') {
+        if (options === 'View all employees') {
             viewEmployees();
         }
 
-        // if (choices === 'Add a department') {
-        //     addDepartment();
-        // }
+        if (options === 'Add a department') {
+            addDepartment();
+        }
     
-        // if (choices === 'Add a role') {
+        // if (options === 'Add a role') {
         //     addRole();
         // }
     
-        // if (choices === 'Add an employee') {
+        // if (options === 'Add an employee') {
         //     addEmployee();
         // }
     
-        // if (choices === 'Update an employee role') {
+        // if (options === 'Update an employee role') {
         //     updateEmployee();
         // }
 
-        // if (choices === 'Exit') {
+        // if (options === 'Exit') {
         //     db.end()
         // };
     });
@@ -74,9 +74,9 @@ viewDepartments = () => {
     });
   };
 
-
+// Do I have to put viewDepartments/viewRoles/viewEmployees as a function or const?
 // viewDepartments = () => {
-//     const sql = `SELECT department.id AS id, department.name AS department FROM department`; 
+//     const sql = 'SELECT * FROM department'; 
   
 //     db.promise().query(sql, (err, rows) => {
 //       if (err) throw err;
@@ -104,3 +104,32 @@ viewEmployees = () => {
       promptUser();
     });
   };
+
+addDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'addDept',
+            message: 'What department would you like to add?',
+            validate: addDept => {
+                if (addDept) {
+                    return true;
+                } else {
+                  console.log("Please enter the department name!");
+                  return false;
+                }
+            }
+        }   
+    ])
+    .then(response => {
+        const sql = `INSERT INTO department (name)
+                    VALUES (?)`;
+        db.query(sql, response.addDept, (err, result) => {
+          if (err) throw err;
+          console.log('Added ' + response.addDept + " to departments!"); 
+  
+          viewDepartments();
+      });
+    });
+};
+
