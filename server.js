@@ -79,13 +79,13 @@ const promptUser = () => {
                 deleteDepartment();
             }
 
-            // if (options === 'Delete role') {
-            //     deleteRole();
-            // }
+            if (options === 'Delete role') {
+                deleteRole();
+            }
 
-            // if (options === 'Delete employee') {
-            //     deleteEmployee();
-            // }
+            if (options === 'Delete employee') {
+                deleteEmployee();
+            }
         });
 };
 
@@ -470,6 +470,62 @@ deleteDepartment = () => {
     });
 };
 
-// deleteRole
+deleteRole = () => {
+    const roleSql = `SELECT * FROM role`;
 
-// deleteEmployee
+    db.query(roleSql, (err, data) => {
+        if (err) throw err;
+
+        const role = data.map(({ title, id }) => ({ name: title, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'role',
+                message: "What role do you want to delete?",
+                choices: role
+            }
+        ])
+            .then(roleChoice => {
+                const role = roleChoice.role;
+                const sql = `DELETE FROM role WHERE id = ?`;
+
+                db.query(sql, role, (err, result) => {
+                    if (err) throw err;
+                    console.log("Successfully deleted!");
+
+                    viewRoles();
+                });
+            });
+    });
+};
+
+deleteEmployee = () => {
+    const employeeSql = `SELECT * FROM employee`;
+
+    db.query(employeeSql, (err, data) => {
+        if (err) throw err;
+
+        const employee = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: "What employee do you want to delete?",
+                choices: employee
+            }
+        ])
+            .then(employeeChoice => {
+                const employee = employeeChoice.employee;
+                const sql = `DELETE FROM employee WHERE id = ?`;
+
+                db.query(sql, employee, (err, result) => {
+                    if (err) throw err;
+                    console.log("Successfully deleted!");
+
+                    viewEmployees();
+                });
+            });
+    });
+};
