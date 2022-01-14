@@ -54,9 +54,9 @@ const promptUser = () => {
                 addEmployee();
             }
 
-            // if (options === 'Update an employee role') {
-            //     updateEmployee();
-            // }
+            if (options === 'Update an employee role') {
+                updateEmployee();
+            }
 
             // if (options === 'Exit') {
             //     db.end()
@@ -180,22 +180,22 @@ addRole = () => {
             }
         }
     ])
-    .then(response => {
-        const sql = `INSERT INTO role (title, salary, department_id)
+        .then(response => {
+            const sql = `INSERT INTO role (title, salary, department_id)
                     VALUES (?, ?, ?)`;
 
-        db.query(sql, [response.addRole, response.addSalary, response.inclDept], (err, result) => {
-            if (err) {
-                console.log("This department does not exist. Please choose from an existing department and try again."); 
-                addRole();
-                return
-            } else {
-                console.log('Added ' + response.addRole + " to roles!");
-            }
-            
-            viewRoles();
+            db.query(sql, [response.addRole, response.addSalary, response.inclDept], (err, result) => {
+                if (err) {
+                    console.log("This department does not exist. Please choose from an existing department and try again.");
+                    addRole();
+                    return
+                } else {
+                    console.log('Added ' + response.addRole + " to roles!");
+                }
+
+                viewRoles();
+            });
         });
-    });
 };
 
 addEmployee = () => {
@@ -203,7 +203,7 @@ addEmployee = () => {
         {
             type: 'input',
             name: 'firstName',
-            message: 'What is the first name of the employee?',
+            message: "What is the employee's first name?",
             validate: firstName => {
                 if (firstName) {
                     return true;
@@ -216,7 +216,7 @@ addEmployee = () => {
         {
             type: 'input',
             name: 'lastName',
-            message: 'What is the last name of the employee?',
+            message: "What is the employee's last name?",
             validate: lastName => {
                 if (lastName) {
                     return true;
@@ -229,7 +229,7 @@ addEmployee = () => {
         {
             type: 'input',
             name: 'inclRole',
-            message: 'What is the role of the employee?',
+            message: "What is the employee's role?",
             validate: inclRole => {
                 if (isNaN(inclRole)) {
                     console.log("Please enter a number that corresponds to a role!");
@@ -242,7 +242,7 @@ addEmployee = () => {
         {
             type: 'input',
             name: 'inclMan',
-            message: 'Who is the manager of the employee?',
+            message: "Who is the employee's manager?",
             validate: inclMan => {
                 if (isNaN(inclMan)) {
                     console.log("Please enter a number that corresponds to a manager!");
@@ -251,33 +251,80 @@ addEmployee = () => {
                     return true;
                 }
             }
-        }      
+        }
     ])
-    .then(response => {
-        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+        .then(response => {
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                     VALUES (?, ?, ?, ?)`;
 
-        db.query(sql, [response.firstName, response.lastName, response.inclRole, response.inclMan], (err, result) => {
-            if (err) {
-                console.log("This department does not exist. Please choose from an existing department and try again."); 
-                addEmployee();
-                return
-            } else {
-                console.log('Added ' + response.addEmployee + " to employees!");
-            }
+            db.query(sql, [response.firstName, response.lastName, response.inclRole, response.inclMan], (err, result) => {
+                if (err) {
+                    console.log("This department does not exist. Please choose from an existing department and try again.");
+                    addEmployee();
+                    return
+                } else {
+                    console.log('Added ' + response.addEmployee + " to employees!");
+                }
 
-            viewEmployees();
+                viewEmployees();
+            });
         });
-    });
 };
 
 updateEmployee = () => {
     const employeeSql = `SELECT * FROM employee`;
-    
-    db.query
-    inquirer.prompt([
-        {
 
-        }
-    ])
-}
+    db.query(employeeSql, (err, data) => {
+        if (err) throw err;
+
+        const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'name',
+                message: "Which employee would you like to update?",
+                choices: employees
+            }
+        ])
+            .then(empChoice => {
+                const employee = empChoice.name;
+                const params = [];
+                params.push(employee);
+
+                const roleSql = `SELECT * FROM role`;
+
+                db.query(roleSql, (err, rows) => {
+                    if (err) throw err;
+
+                    const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'role',
+                            message: "What is the employee's new role?",
+                            choices: roles
+                        }
+                    ])
+                        .then(roleChoice => {
+                            const role = roleChoice.role;
+                            params.push(role);
+
+                            let employee = params[0]
+                            params[0] = role
+                            params[1] = employee
+
+                            const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+
+                            db.query(sql, params, (err, result) => {
+                                if (err) throw err;
+                                console.log("Employee has been updated!");
+
+                                viewEmployees();
+                            });
+                        });
+                });
+            });
+    });
+};
