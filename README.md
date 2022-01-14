@@ -3,7 +3,7 @@
 ## Description
 For this challenge, I was tasked with creating an employee database for a business that includes information about the departments, roles, and employees. Using MySQL, I created a database with different tables for "department", "role", and "employee" that can be accessed from the command line. Through Inquirer, the user is prompted through questions that allow the user to view, add, and update the database.
 
-Here is a video of how it functions: 
+Here is a video of how it functions: https://youtu.be/iYRxNdp6bAU
 
 ## Installation
 You will need to run npm install to install all dependencies, such as Inquirer, MySQL, and console.table.

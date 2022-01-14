@@ -327,7 +327,7 @@ updateEmployee = () => {
                     inquirer.prompt([
                         {
                             type: 'list',
-                            name: 'newRole',
+                            name: 'role',
                             message: "What is the employee's new role?",
                             choices: roles
                         }
@@ -385,7 +385,7 @@ updateManager = () => {
                     inquirer.prompt([
                         {
                             type: 'list',
-                            name: 'newManager',
+                            name: 'manager',
                             message: "Who is the employee's new manager?",
                             choices: managers
                         }
@@ -431,6 +431,7 @@ viewEmpdept = () => {
                       employee.last_name, 
                       department.name AS department
                FROM employee
+               LEFT JOIN role ON employee.role_id = role.id 
                LEFT JOIN department ON role.department_id = department.id`;
 
     db.query(sql, (err, rows) => {
