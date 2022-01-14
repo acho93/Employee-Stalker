@@ -23,6 +23,7 @@ const promptUser = () => {
                 'Add a role',
                 'Add an employee',
                 'Update an employee role',
+                'Update employee managers',
                 'Exit'
             ]
         }
@@ -56,6 +57,10 @@ const promptUser = () => {
 
             if (options === 'Update an employee role') {
                 updateEmployee();
+            }
+
+            if (options === 'Update employee managers') {
+                updateManager();
             }
 
             // if (options === 'Exit') {
@@ -294,7 +299,7 @@ updateEmployee = () => {
 
                 const roleSql = `SELECT * FROM role`;
 
-                db.query(roleSql, (err, rows) => {
+                db.query(roleSql, (err, data) => {
                     if (err) throw err;
 
                     const roles = data.map(({ id, title }) => ({ name: title, value: id }));
@@ -302,7 +307,7 @@ updateEmployee = () => {
                     inquirer.prompt([
                         {
                             type: 'list',
-                            name: 'role',
+                            name: 'newRole',
                             message: "What is the employee's new role?",
                             choices: roles
                         }
@@ -316,6 +321,65 @@ updateEmployee = () => {
                             params[1] = employee
 
                             const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+
+                            db.query(sql, params, (err, result) => {
+                                if (err) throw err;
+                                console.log("Employee has been updated!");
+
+                                viewEmployees();
+                            });
+                        });
+                });
+            });
+    });
+};
+
+//START HERE
+updateManager = () => {
+    const employeeSql = `SELECT * FROM employee`;
+
+    db.query(employeeSql, (err, data) => {
+        if (err) throw err;
+
+        const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'name',
+                message: "Which employee would you like to update?",
+                choices: employees
+            }
+        ])
+            .then(empChoice => {
+                const employee = empChoice.name;
+                const params = [];
+                params.push(employee);
+
+                const managerSql = `SELECT * FROM employee`;
+
+                db.query(managerSql, (err, data) => {
+                    if (err) throw err;
+
+                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'newManager',
+                            message: "Who is the employee's new manager?",
+                            choices: managers
+                        }
+                    ])
+                        .then(managerChoice => {
+                            const manager = managerChoice.manager;
+                            params.push(manager);
+
+                            let employee = params[0]
+                            params[0] = manager
+                            params[1] = employee
+
+                            const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`;
 
                             db.query(sql, params, (err, result) => {
                                 if (err) throw err;
