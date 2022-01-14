@@ -24,7 +24,8 @@ const promptUser = () => {
                 'Add an employee',
                 'Update an employee role',
                 'Update employee managers',
-                'Exit'
+                'View employees by manager',
+                'View employees by department'
             ]
         }
     ])
@@ -63,9 +64,13 @@ const promptUser = () => {
                 updateManager();
             }
 
-            // if (options === 'Exit') {
-            //     db.end()
-            // };
+            if (options === 'View employees by manager') {
+                viewEmpman();
+            }
+
+            if (options === 'View employees by department') {
+                viewEmpdept();
+            }
         });
 };
 
@@ -334,7 +339,6 @@ updateEmployee = () => {
     });
 };
 
-//START HERE
 updateManager = () => {
     const employeeSql = `SELECT * FROM employee`;
 
@@ -361,7 +365,7 @@ updateManager = () => {
                 db.query(managerSql, (err, data) => {
                     if (err) throw err;
 
-                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
 
                     inquirer.prompt([
                         {
@@ -390,5 +394,33 @@ updateManager = () => {
                         });
                 });
             });
+    });
+};
+
+viewEmpman = () => {
+    const sql = `SELECT employee.first_name, 
+                        employee.last_name, 
+                        CONCAT (manager.first_name, " ", manager.last_name) AS manager
+                FROM employee
+                LEFT JOIN employee manager ON employee.manager_id = manager.id`;
+
+    db.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        promptUser();
+    });
+};
+
+viewEmpdept = () => {
+    const sql = `SELECT employee.first_name, 
+                      employee.last_name, 
+                      department.name AS department
+               FROM employee
+               LEFT JOIN department ON role.department_id = department.id`;
+
+    db.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        promptUser();
     });
 };
