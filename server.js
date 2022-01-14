@@ -25,7 +25,10 @@ const promptUser = () => {
                 'Update an employee role',
                 'Update employee managers',
                 'View employees by manager',
-                'View employees by department'
+                'View employees by department',
+                'Delete department',
+                'Delete role',
+                'Delete employee'
             ]
         }
     ])
@@ -71,6 +74,18 @@ const promptUser = () => {
             if (options === 'View employees by department') {
                 viewEmpdept();
             }
+
+            if (options === 'Delete department') {
+                deleteDepartment();
+            }
+
+            // if (options === 'Delete role') {
+            //     deleteRole();
+            // }
+
+            // if (options === 'Delete employee') {
+            //     deleteEmployee();
+            // }
         });
 };
 
@@ -424,3 +439,37 @@ viewEmpdept = () => {
         promptUser();
     });
 };
+
+deleteDepartment = () => {
+    const deptSql = `SELECT * FROM department`;
+
+    db.query(deptSql, (err, data) => {
+        if (err) throw err;
+
+        const dept = data.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'dept',
+                message: "What department do you want to delete?",
+                choices: dept
+            }
+        ])
+            .then(deptChoice => {
+                const dept = deptChoice.dept;
+                const sql = `DELETE FROM department WHERE id = ?`;
+
+                db.query(sql, dept, (err, result) => {
+                    if (err) throw err;
+                    console.log("Successfully deleted!");
+
+                    viewDepartments();
+                });
+            });
+    });
+};
+
+// deleteRole
+
+// deleteEmployee
